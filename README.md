@@ -1,6 +1,8 @@
 
 # GAR7IC - S7COMM Network Analysis Tool  
-![GAR7IC Logo](gar7ic_logo.png)
+<p align="center">
+  <img src="gar7ic_logo.png" alt="GAR7IC Logo" width="150">
+</p>
 
 ## 📌 Overview  
 **GAR7IC** (*Generalized Automatic Review and Labelling for S7COMM Industrial Communication*) is a **tool for analyzing and labeling S7COMM network traffic**.  
