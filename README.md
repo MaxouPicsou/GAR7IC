@@ -1,4 +1,4 @@
-```markdown
+
 # GAR7IC - S7COMM Network Capture and Analysis Tool  
 
 ## 📌 Overview  
@@ -144,4 +144,4 @@ After processing, packets in **Wireshark** will contain **comments**:
 This project is licensed under the **MIT License**.
 
 🔹 **Contributions are welcome! 🚀**
-```
+
