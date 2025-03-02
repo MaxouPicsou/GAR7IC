@@ -133,8 +133,8 @@ python gar7ic.py -f capture.pcapng -c config.yaml -p
 ### 2️⃣ **Annotated PCAP in Wireshark**  
 After processing, packets in **Wireshark** will contain **comments**:
 ```
-[Frame 12] READ Request - Temperature
-[Frame 15] WRITE Request - Setpoint
+Temperature
+Machine State
 ```
 🔹 **Only the variable "name" appears in the PCAP comments. No full data values are stored.**  
 
