@@ -161,7 +161,7 @@ def convert_s7_hex_to_value(hex_str, data_type, bit_index=0):
 # SCRIPT ARGUMENTS
 # ===============================
 
-parser = argparse.ArgumentParser(description="GAR7IC is a tool to record or read S7COMM capture and labelling it according to configuration file.")
+parser = argparse.ArgumentParser(description="GAR7IC is a tool read S7COMM capture and labelling it according to configuration file.")
 
 parser.add_argument("-f", "--file", type=str, help="", required=True)
 parser.add_argument("-c", "--configuration", type=str, help="", required=True)
