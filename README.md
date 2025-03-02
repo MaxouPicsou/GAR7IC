@@ -1,8 +1,9 @@
 
-# GAR7IC - S7COMM Network Capture and Analysis Tool  
+# GAR7IC - S7COMM Network Analysis Tool  
+![GAR7IC Logo](images/logo.png)
 
 ## 📌 Overview  
-**GAR7IC** (*Generalized Automatic Recording and Labeling for Industrial Communication*) is a **tool for analyzing and labeling S7COMM network traffic**.  
+**GAR7IC** (*Generalized Automatic Review and Labelling for S7COMM Industrial Communication*) is a **tool for analyzing and labeling S7COMM network traffic**.  
 It processes **Siemens PLC (Programmable Logic Controller) communications**, extracts data values, and stores them in a **PCAP file** or a **structured Pandas table**.
 
 ### 🎯 Key Features  
