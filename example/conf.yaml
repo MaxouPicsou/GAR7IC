@@ -1,0 +1,21 @@
+plc:
+  - name: Cooler
+    model: CPU 315-2 PN/DP
+    ip: 127.0.0.1
+    rack: 0
+    slot: 0
+    port: 102
+    io_mapping:
+      data_block:
+        - name: DB1
+          number: 1
+          variables:
+            - name: Machine state
+              address: 0.0
+              type: BOOL
+            - name: Desired temperature
+              address: 2.0
+              type: INT
+            - name: Current temperature
+              address: 4.0
+              type: REAL
