@@ -16,6 +16,7 @@ class S7CommParamFunction(Enum):
     READ = 0x04
     WRITE = 0x05
     PLC_STOP = 0x29
+    SETUP_COMMUNICATION = 0xf0
 
 class S7CommHeaderRosctr(Enum):
     """ Enumeration of S7COMM ROSCTR header types. """
@@ -65,6 +66,7 @@ def build_fast_lookup(plcs):
     for plc in plcs:
         ip = plc["ip"]
         lookup[ip] = {
+            "name": plc["name"],
             "data_block": [],
             "input": [],
             "output": []
@@ -208,23 +210,26 @@ if args.pcap:
         # JOB (request)
         if header_rosctr == S7CommHeaderRosctr.JOB.value:
 
-            param_item_area = int(getattr(packet.s7comm, 'param_item_area'), 16)
-            param_item_address = int(getattr(packet.s7comm, 'param_item_address'), 16)
-            param_item_address_byte = param_item_address // 8
-            param_item_address_bit = param_item_address % 8
+            if param_func != S7CommParamFunction.SETUP_COMMUNICATION.value:
 
-            variable_info = find_variable(packet_ip_dst, param_item_address_byte, param_item_address_bit, param_item_area, fast_lookup)
-            buffer_pduref[header_pduref] = variable_info
+                param_item_area = int(getattr(packet.s7comm, 'param_item_area'), 16)
+                param_item_address = int(getattr(packet.s7comm, 'param_item_address'), 16)
+                param_item_address_byte = param_item_address // 8
+                param_item_address_bit = param_item_address % 8
 
-            os.system("editcap -a " + packet_number + ":'" + variable_info['name'] + "' output.pcapng output.pcapng")
+                variable_info = find_variable(packet_ip_dst, param_item_address_byte, param_item_address_bit, param_item_area, fast_lookup)
+                buffer_pduref[header_pduref] = variable_info
+
+                os.system("editcap -a " + packet_number + ":'" + variable_info['name'] + "' output.pcapng output.pcapng")
 
         # ACK_DATA (response with data)
         elif header_rosctr == S7CommHeaderRosctr.ACK_DATA.value:
 
-            if header_pduref in buffer_pduref:
-                variable_info = buffer_pduref[header_pduref]
+            if param_func != S7CommParamFunction.SETUP_COMMUNICATION.value:
+                if header_pduref in buffer_pduref:
+                    variable_info = buffer_pduref[header_pduref]
 
-            os.system("editcap -a " + packet_number + ":'" + variable_info['name'] + "' output.pcapng output.pcapng")
+                os.system("editcap -a " + packet_number + ":'" + variable_info['name'] + "' output.pcapng output.pcapng")
 
         else:
             os.system("editcap -a " + packet_number + ":'Unknown S7COMM device.' output.pcapng output.pcapng")
