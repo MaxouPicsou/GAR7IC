@@ -26,8 +26,8 @@ class S7CommHeaderRosctr(Enum):
 
 class S7CommMemoryArea(Enum):
     """ Enumeration of S7COMM memory areas. """
-    INPUT = 0x81
-    OUTPUT = 0x82
+    INPUTS = 0x81
+    OUTPUTS = 0x82
     DATA_BLOCK = 0x84
 
 class S7CommTransportSize(Enum):
@@ -68,8 +68,8 @@ def build_fast_lookup(plcs):
         lookup[ip] = {
             "name": plc["name"],
             "data_block": [],
-            "input": [],
-            "output": []
+            "inputs": [],
+            "outputs": []
         }
 
         # DATA_BLOCK
@@ -86,25 +86,25 @@ def build_fast_lookup(plcs):
                 })
 
         # INPUT
-        if "input" in plc["io_mapping"]:
-            for var in plc["io_mapping"]["input"]:
-                lookup[ip]["input"].append({
+        if "inputs" in plc["io_mapping"]:
+            for var in plc["io_mapping"]["inputs"]:
+                lookup[ip]["inputs"].append({
                     "ip": ip,
                     "address": var["address"],
                     "name": var["name"],
                     "type": var["type"],
-                    "area": "INPUT"
+                    "area": "INPUTS"
                 })
 
         # OUTPUT
-        if "output" in plc["io_mapping"]:
-            for var in plc["io_mapping"]["output"]:
-                lookup[ip]["output"].append({
+        if "outputs" in plc["io_mapping"]:
+            for var in plc["io_mapping"]["outputs"]:
+                lookup[ip]["outputs"].append({
                     "ip": ip,
                     "address": var["address"],
                     "name": var["name"],
                     "type": var["type"],
-                    "area": "OUTPUT"
+                    "area": "OUTPUTS"
                 })
 
     return lookup
@@ -228,13 +228,14 @@ if args.pcap:
             if param_func != S7CommParamFunction.SETUP_COMMUNICATION.value:
                 if header_pduref in buffer_pduref:
                     variable_info = buffer_pduref[header_pduref]
+                    buffer_pduref.pop(header_pduref)
 
                 os.system("editcap -a " + packet_number + ":'" + variable_info['name'] + "' output.pcapng output.pcapng")
 
         else:
             os.system("editcap -a " + packet_number + ":'Unknown S7COMM device.' output.pcapng output.pcapng")
 
-    packets.close()
+    print("Data saved to 'output.pcapng'.")
 
 elif args.table:
     # Dataframe creation
@@ -277,7 +278,7 @@ elif args.table:
             header_rosctr = S7CommHeaderRosctr(int(header_rosctr, 16)).name
 
         header_pduref = getattr(packet.s7comm, "header_pduref", "Unknown")
-        header_datlg = getattr(packet.s7comm, "header_datlg", "Unknown")
+        header_datlg = int(getattr(packet.s7comm, "header_datlg", "Unknown"))
 
         # === PARAMETER ===
         param_func = S7CommParamFunction(int(getattr(packet.s7comm, "param_func", "Unknown"), 16)).name
@@ -310,23 +311,30 @@ elif args.table:
 
         data_value = "Unknown"
 
-        if header_datlg:
-            if header_rosctr == S7CommHeaderRosctr.JOB.name:
+        if header_rosctr == S7CommHeaderRosctr.JOB.name:
+            if param_func != S7CommParamFunction.SETUP_COMMUNICATION.name:
                 variable_info = find_variable(dst_ip, param_item_address_byte, param_item_address_bit, param_item_area,
                                               fast_lookup)
+
                 if param_func == S7CommParamFunction.WRITE.name:
                     resp_data = getattr(packet.s7comm, 'resp_data')
                     data_value = convert_s7_hex_to_value(resp_data, variable_info["type"])
 
                 buffer_pduref[header_pduref] = variable_info
-
             else:
-                if header_pduref in buffer_pduref:
-                    variable_info = buffer_pduref[header_pduref]
+                variable_info = {"name": "Unknown", "type": "Unknown"}
 
-                if param_func == S7CommParamFunction.READ.name:
-                    resp_data = getattr(packet.s7comm, 'resp_data')
-                    data_value = convert_s7_hex_to_value(resp_data, variable_info["type"])
+        else:
+            if header_pduref in buffer_pduref:
+                variable_info = buffer_pduref[header_pduref]
+                buffer_pduref.pop(header_pduref)
+
+            if param_func == S7CommParamFunction.READ.name:
+                resp_data = getattr(packet.s7comm, 'resp_data')
+                data_value = convert_s7_hex_to_value(resp_data, variable_info["type"])
+
+        """else:
+            variable_info = {"type": "Unknown", "name": "Unknown"}"""
 
         new_row = pd.DataFrame([{"Frame_Number": frame_number,
                                     "Timestamp": timestamp,
@@ -355,7 +363,7 @@ elif args.table:
     df.to_csv("output.csv", index=False, encoding="utf-8")
     print("Data saved to 'output.csv'.")
 
-
+packets.close()
 
 
 
